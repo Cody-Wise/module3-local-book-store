@@ -2,6 +2,7 @@ const pool = require('../lib/utils/pool');
 const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
+const Book = require('../lib/models/Book');
 
 describe('book routes', () => {
   beforeEach(() => {
@@ -21,6 +22,18 @@ describe('book routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.title).toEqual('One Hundred Years of Solitude');
     expect(res.body.released).toEqual(1967);
+  });
+
+  it('should add a book', async () => {
+    const book = await new Book({
+      title: 'Codys Magical Book',
+      released: 1999,
+    });
+    const res = await request(app).post('/books').send(book);
+    expect(res.body.title).toEqual(book.title);
+    expect(res.body.released).toEqual(book.released);
+    // const count = await Book.count();
+    // expect(count).toEqual(3);
   });
 
   afterAll(() => {
