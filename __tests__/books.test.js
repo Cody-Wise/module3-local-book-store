@@ -17,7 +17,7 @@ describe('book routes', () => {
     expect(gatsby).toHaveProperty('released', 1925);
   });
 
-  it('should return a single books details with a nested author', async () => {
+  it('should return a single book details with a nested author', async () => {
     const res = await request(app).get('/books/2');
     expect(res.status).toBe(200);
     expect(res.body.title).toEqual('One Hundred Years of Solitude');
