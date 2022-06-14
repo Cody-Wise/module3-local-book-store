@@ -2,6 +2,7 @@ const pool = require('../lib/utils/pool');
 const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
+const Author = require('../lib/models/Author');
 
 describe('author routes', () => {
   beforeEach(() => {
@@ -19,11 +20,25 @@ describe('author routes', () => {
     expect(mockingbird).toHaveProperty('pob', 'St Paul, MN');
   });
 
-  it('should return a single authors details', async () => {
+  it('should return single author details with nested book', async () => {
     const res = await request(app).get('/authors/2');
+    console.log('res', res.body);
     expect(res.status).toBe(200);
-    expect(res.body.name).toEqual('Gabriel García Márquez');
-    expect(res.body.dob).toEqual('03/06/1927');
+    expect(res.body[0].name).toEqual('Gabriel García Márquez');
+    expect(res.body[0].dob).toEqual('03/06/1927');
+    expect(res.body[0].books[0].title).toEqual('One Hundred Years of Solitude');
+  });
+
+  it('should add an author', async () => {
+    const author = await new Author({
+      dob: '11/15/1985',
+      pob: 'Heppner, Oregon',
+      name: 'Cody Wise',
+    });
+    const res = await request(app).post('/authors').send(author);
+    expect(res.body.dob).toEqual(author.dob);
+    expect(res.body.pob).toEqual(author.pob);
+    expect(res.body.name).toEqual(author.name);
   });
 
   afterAll(() => {
