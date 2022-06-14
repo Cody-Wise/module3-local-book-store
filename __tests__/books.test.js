@@ -17,11 +17,12 @@ describe('book routes', () => {
     expect(gatsby).toHaveProperty('released', 1925);
   });
 
-  it('should return a single authors details', async () => {
+  it('should return a single books details with a nested author', async () => {
     const res = await request(app).get('/books/2');
     expect(res.status).toBe(200);
     expect(res.body.title).toEqual('One Hundred Years of Solitude');
     expect(res.body.released).toEqual(1967);
+    expect(res.body.authors[0].name).toEqual('Gabriel García Márquez');
   });
 
   it('should add a book', async () => {
@@ -32,8 +33,6 @@ describe('book routes', () => {
     const res = await request(app).post('/books').send(book);
     expect(res.body.title).toEqual(book.title);
     expect(res.body.released).toEqual(book.released);
-    // const count = await Book.count();
-    // expect(count).toEqual(3);
   });
 
   afterAll(() => {
