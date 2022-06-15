@@ -2,7 +2,6 @@ const pool = require('../lib/utils/pool');
 const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
-const Book = require('../lib/models/Book');
 
 describe('book routes', () => {
   beforeEach(() => {
@@ -25,14 +24,20 @@ describe('book routes', () => {
     expect(res.body.authors[0].name).toEqual('Gabriel García Márquez');
   });
 
-  it('should add a book', async () => {
-    const book = await new Book({
-      title: 'Codys Magical Book',
-      released: 1999,
-    });
-    const res = await request(app).post('/books').send(book);
-    expect(res.body.title).toEqual(book.title);
-    expect(res.body.released).toEqual(book.released);
+  it('POST /book should create a new book with an associated author', async () => {
+    const resp = await request(app)
+      .post('/books')
+      .send({
+        title: 'Codys Magical Cookbook',
+        released: 1990,
+        authorIds: [1, 2],
+      });
+    expect(resp.status).toBe(200);
+    expect(resp.body.title).toEqual('Codys Magical Cookbook');
+    expect(resp.body.released).toEqual(1990);
+
+    const newBook = await request(app).get(`/books/${resp.body.id}`);
+    expect(newBook.body.authors.length).toBe(2);
   });
 
   afterAll(() => {

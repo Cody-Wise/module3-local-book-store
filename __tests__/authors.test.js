@@ -2,7 +2,6 @@ const pool = require('../lib/utils/pool');
 const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
-const Author = require('../lib/models/Author');
 
 describe('author routes', () => {
   beforeEach(() => {
@@ -28,16 +27,22 @@ describe('author routes', () => {
     expect(res.body[0].books[0].title).toEqual('One Hundred Years of Solitude');
   });
 
-  it('should add an author', async () => {
-    const author = await new Author({
-      dob: '11/15/1985',
-      pob: 'Heppner, Oregon',
-      name: 'Cody Wise',
-    });
-    const res = await request(app).post('/authors').send(author);
-    expect(res.body.dob).toEqual(author.dob);
-    expect(res.body.pob).toEqual(author.pob);
-    expect(res.body.name).toEqual(author.name);
+  it('POST /author should create a new author with an associated book', async () => {
+    const resp = await request(app)
+      .post('/authors')
+      .send({
+        dob: '11/15/1985',
+        pob: 'Heppner, Oregon',
+        name: 'Cody Wise',
+        bookIds: [1, 2],
+      });
+    expect(resp.status).toBe(200);
+    expect(resp.body.dob).toEqual('11/15/1985');
+    expect(resp.body.pob).toEqual('Heppner, Oregon');
+    expect(resp.body.name).toEqual('Cody Wise');
+
+    const newAuthor = await request(app).get(`/authors/${resp.body.id}`);
+    expect(newAuthor.body[0].books.length).toBe(2);
   });
 
   afterAll(() => {
